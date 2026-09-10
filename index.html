@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,6 +54,7 @@
             margin-bottom: 8px;
         }
 
+        input[type="text"],
         input[type="date"] {
             width: 100%;
             padding: 12px;
@@ -64,6 +64,7 @@
             background: white;
         }
 
+        input[type="text"]:focus,
         input[type="date"]:focus {
             outline: none;
             border-color: #555;
@@ -135,11 +136,28 @@
         <h1>Date Range Request</h1>
 
         <p class="description">
-            Select the date range you would like to process.
+            Enter the company number and select the date range you would like to process.
             The maximum allowed range is 31 days.
         </p>
 
         <form id="dateForm">
+
+            <!-- COMPANY NUMBER -->
+
+            <div class="form-group">
+                <label for="companyNumber">Company Number</label>
+
+                <input
+                    type="text"
+                    id="companyNumber"
+                    name="company_number"
+                    placeholder="Enter company number"
+                    required
+                >
+            </div>
+
+
+            <!-- FROM DATE -->
 
             <div class="form-group">
                 <label for="fromDate">From Date</label>
@@ -151,6 +169,9 @@
                     required
                 >
             </div>
+
+
+            <!-- TO DATE -->
 
             <div class="form-group">
                 <label for="toDate">To Date</label>
@@ -169,7 +190,13 @@
                 <div class="range-info" id="rangeInfo"></div>
             </div>
 
+
+            <!-- ERROR MESSAGE -->
+
             <div class="error" id="errorMessage"></div>
+
+
+            <!-- SUBMIT -->
 
             <button type="submit" id="submitButton">
                 Submit
@@ -178,6 +205,8 @@
         </form>
     </div>
 
+
+    <!-- SUCCESS MESSAGE -->
 
     <div class="form-card success" id="successCard">
 
@@ -199,15 +228,9 @@
     // ============================================================
     // n8n WEBHOOK
     // ============================================================
-    //
-    // Replace this URL with your n8n PRODUCTION webhook URL.
-    //
-    // Example:
-    // https://your-n8n-instance.com/webhook/date-range
-    //
-    // ============================================================
 
-    const N8N_WEBHOOK_URL = "https://bennettfc.app.n8n.cloud/webhook/6b3a87e2-90bc-44a9-b5ed-9632000d068f";
+    const N8N_WEBHOOK_URL =
+        "https://bennettfc.app.n8n.cloud/webhook/6b3a87e2-90bc-44a9-b5ed-9632000d068f";
 
 
     // ============================================================
@@ -216,33 +239,52 @@
 
     const form = document.getElementById("dateForm");
 
-    const fromDateInput = document.getElementById("fromDate");
-    const toDateInput = document.getElementById("toDate");
+    const companyNumberInput =
+        document.getElementById("companyNumber");
 
-    const errorMessage = document.getElementById("errorMessage");
-    const rangeInfo = document.getElementById("rangeInfo");
+    const fromDateInput =
+        document.getElementById("fromDate");
 
-    const submitButton = document.getElementById("submitButton");
+    const toDateInput =
+        document.getElementById("toDate");
 
-    const formCard = document.getElementById("formCard");
-    const successCard = document.getElementById("successCard");
+    const errorMessage =
+        document.getElementById("errorMessage");
 
-    const submittedDates = document.getElementById("submittedDates");
+    const rangeInfo =
+        document.getElementById("rangeInfo");
+
+    const submitButton =
+        document.getElementById("submitButton");
+
+    const formCard =
+        document.getElementById("formCard");
+
+    const successCard =
+        document.getElementById("successCard");
+
+    const submittedDates =
+        document.getElementById("submittedDates");
 
 
     // ============================================================
-    // HELPER: CALCULATE CALENDAR-DAY DIFFERENCE
+    // CALCULATE DATE DIFFERENCE
     // ============================================================
 
     function getDateDifference(fromDate, toDate) {
 
-        const from = new Date(fromDate + "T00:00:00");
-        const to = new Date(toDate + "T00:00:00");
+        const from =
+            new Date(fromDate + "T00:00:00");
 
-        const differenceMilliseconds = to - from;
+        const to =
+            new Date(toDate + "T00:00:00");
+
+        const differenceMilliseconds =
+            to - from;
 
         return Math.round(
-            differenceMilliseconds / (1000 * 60 * 60 * 24)
+            differenceMilliseconds /
+            (1000 * 60 * 60 * 24)
         );
     }
 
@@ -254,6 +296,7 @@
     function showError(message) {
 
         errorMessage.textContent = message;
+
         errorMessage.style.display = "block";
     }
 
@@ -265,6 +308,7 @@
     function clearError() {
 
         errorMessage.textContent = "";
+
         errorMessage.style.display = "none";
     }
 
@@ -277,8 +321,12 @@
 
         clearError();
 
-        const fromDate = fromDateInput.value;
-        const toDate = toDateInput.value;
+        const fromDate =
+            fromDateInput.value;
+
+        const toDate =
+            toDateInput.value;
+
 
         if (!fromDate || !toDate) {
 
@@ -287,10 +335,12 @@
             return;
         }
 
-        const differenceDays = getDateDifference(
-            fromDate,
-            toDate
-        );
+
+        const differenceDays =
+            getDateDifference(
+                fromDate,
+                toDate
+            );
 
 
         // To date before from date
@@ -334,7 +384,7 @@
 
 
     // ============================================================
-    // LIVE VALIDATION
+    // LIVE DATE VALIDATION
     // ============================================================
 
     fromDateInput.addEventListener(
@@ -352,154 +402,191 @@
     // FORM SUBMISSION
     // ============================================================
 
-    form.addEventListener("submit", async function(event) {
+    form.addEventListener(
+        "submit",
+        async function(event) {
 
-        // Stop the browser from submitting normally
-        event.preventDefault();
+            event.preventDefault();
 
-        clearError();
-
-
-        const fromDate = fromDateInput.value;
-        const toDate = toDateInput.value;
-
-
-        // --------------------------------------------------------
-        // REQUIRED FIELDS
-        // --------------------------------------------------------
-
-        if (!fromDate || !toDate) {
-
-            showError(
-                "Please select both a From Date and a To Date."
-            );
-
-            return;
-        }
-
-
-        // --------------------------------------------------------
-        // CALCULATE DATE RANGE
-        // --------------------------------------------------------
-
-        const differenceDays = getDateDifference(
-            fromDate,
-            toDate
-        );
-
-
-        // --------------------------------------------------------
-        // TO DATE BEFORE FROM DATE
-        // --------------------------------------------------------
-
-        if (differenceDays < 0) {
-
-            showError(
-                "To date cannot be before the From date."
-            );
-
-            return;
-        }
-
-
-        // --------------------------------------------------------
-        // 31-DAY LIMIT
-        // --------------------------------------------------------
-
-        if (differenceDays > 31) {
-
-            showError(
-                "Date range cannot be longer than 31 days."
-            );
-
-            return;
-        }
-
-
-        // --------------------------------------------------------
-        // PREVENT MULTIPLE SUBMISSIONS
-        // --------------------------------------------------------
-
-        submitButton.disabled = true;
-        submitButton.textContent = "Submitting...";
-
-
-        // --------------------------------------------------------
-        // DATA SENT TO n8n
-        // --------------------------------------------------------
-
-        const data = {
-
-            from_date: fromDate,
-
-            to_date: toDate,
-
-            difference_days: differenceDays
-
-        };
-
-
-        // --------------------------------------------------------
-        // SEND DATA TO n8n WEBHOOK
-        // --------------------------------------------------------
-
-        try {
-
-            const response = await fetch(
-                N8N_WEBHOOK_URL,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify(data)
-                }
-            );
+            clearError();
 
 
             // ----------------------------------------------------
-            // CHECK n8n RESPONSE
+            // GET FORM VALUES
             // ----------------------------------------------------
 
-            if (!response.ok) {
+            const companyNumber =
+                companyNumberInput.value.trim();
 
-                throw new Error(
-                    `n8n returned status ${response.status}`
+            const fromDate =
+                fromDateInput.value;
+
+            const toDate =
+                toDateInput.value;
+
+
+            // ----------------------------------------------------
+            // REQUIRED FIELDS
+            // ----------------------------------------------------
+
+            if (!companyNumber) {
+
+                showError(
+                    "Please enter a company number."
                 );
+
+                return;
+            }
+
+
+            if (!fromDate || !toDate) {
+
+                showError(
+                    "Please select both a From Date and a To Date."
+                );
+
+                return;
             }
 
 
             // ----------------------------------------------------
-            // SUCCESS
+            // CALCULATE DATE RANGE
             // ----------------------------------------------------
 
-            formCard.style.display = "none";
+            const differenceDays =
+                getDateDifference(
+                    fromDate,
+                    toDate
+                );
 
-            successCard.style.display = "block";
 
-            submittedDates.textContent =
-                `From ${fromDate} through ${toDate}`;
+            // ----------------------------------------------------
+            // TO DATE BEFORE FROM DATE
+            // ----------------------------------------------------
+
+            if (differenceDays < 0) {
+
+                showError(
+                    "To date cannot be before the From date."
+                );
+
+                return;
+            }
 
 
-        } catch (error) {
+            // ----------------------------------------------------
+            // 31-DAY LIMIT
+            // ----------------------------------------------------
 
-            console.error(error);
+            if (differenceDays > 31) {
 
-            showError(
-                "There was a problem submitting your request. Please try again."
-            );
+                showError(
+                    "Date range cannot be longer than 31 days."
+                );
 
-            submitButton.disabled = false;
+                return;
+            }
 
-            submitButton.textContent = "Submit";
+
+            // ----------------------------------------------------
+            // PREVENT MULTIPLE SUBMISSIONS
+            // ----------------------------------------------------
+
+            submitButton.disabled = true;
+
+            submitButton.textContent =
+                "Submitting...";
+
+
+            // ----------------------------------------------------
+            // DATA SENT TO n8n
+            // ----------------------------------------------------
+
+            const data = {
+
+                company_number:
+                    companyNumber,
+
+                from_date:
+                    fromDate,
+
+                to_date:
+                    toDate,
+
+                difference_days:
+                    differenceDays
+
+            };
+
+
+            // ----------------------------------------------------
+            // SEND DATA TO n8n
+            // ----------------------------------------------------
+
+            try {
+
+                const response =
+                    await fetch(
+                        N8N_WEBHOOK_URL,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(data)
+                        }
+                    );
+
+
+                // ------------------------------------------------
+                // CHECK n8n RESPONSE
+                // ------------------------------------------------
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `n8n returned status ${response.status}`
+                    );
+                }
+
+
+                // ------------------------------------------------
+                // SUCCESS
+                // ------------------------------------------------
+
+                formCard.style.display =
+                    "none";
+
+                successCard.style.display =
+                    "block";
+
+                submittedDates.textContent =
+                    `Company ${companyNumber}: From ${fromDate} through ${toDate}`;
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    "There was a problem submitting your request. Please try again."
+                );
+
+                submitButton.disabled =
+                    false;
+
+                submitButton.textContent =
+                    "Submit";
+            }
+
         }
-
-    });
+    );
 
 </script>
 
 </body>
 </html>
-```
