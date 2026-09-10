@@ -3,588 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Date Request</title>
 
-    <title>Date Range Request</title>
+```
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #f4f6f8;
+        color: #222;
+    }
 
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f4f6f8;
-            color: #222;
-        }
+    .container {
+        max-width: 500px;
+        margin: 60px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
 
-        .container {
-            max-width: 600px;
-            margin: 80px auto;
-            padding: 0 20px;
-        }
+    h1 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        text-align: center;
+    }
 
-        .form-card {
-            background: white;
-            border-radius: 10px;
-            padding: 35px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-        }
+    .description {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+    }
 
-        h1 {
-            margin-top: 0;
-            margin-bottom: 8px;
-            font-size: 28px;
-        }
+    .form-group {
+        margin-bottom: 20px;
+    }
 
-        .description {
-            margin-top: 0;
-            margin-bottom: 30px;
-            color: #666;
-            line-height: 1.5;
-        }
+    label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+    }
 
-        .form-group {
-            margin-bottom: 22px;
-        }
+    input {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
 
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+    input:focus {
+        outline: none;
+        border-color: #555;
+    }
 
-        input[type="text"],
-        input[type="date"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-            background: white;
-        }
+    .error {
+        display: none;
+        margin-bottom: 20px;
+        padding: 12px;
+        background-color: #fde8e8;
+        color: #b42318;
+        border-radius: 6px;
+        font-size: 14px;
+    }
 
-        input[type="text"]:focus,
-        input[type="date"]:focus {
-            outline: none;
-            border-color: #555;
-        }
+    .success {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        background-color: #e8f5e9;
+        color: #216e39;
+        border-radius: 6px;
+    }
 
-        .help-text {
-            margin-top: 6px;
-            font-size: 13px;
-            color: #777;
-        }
+    button {
+        width: 100%;
+        padding: 13px;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        background-color: #333;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
 
-        .error {
-            display: none;
-            margin-bottom: 20px;
-            padding: 12px 15px;
-            border-radius: 6px;
-            background: #fce8e8;
-            color: #b42318;
-            border: 1px solid #f5b5b5;
-            font-size: 14px;
-        }
+    button:hover {
+        background-color: #555;
+    }
 
-        .success {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
+    button:disabled {
+        background-color: #aaa;
+        cursor: not-allowed;
+    }
 
-        .success h2 {
-            margin-top: 0;
-        }
+    .range-info {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #666;
+    }
+</style>
+```
 
-        button {
-            width: 100%;
-            padding: 13px;
-            border: none;
-            border-radius: 6px;
-            background: #222;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #444;
-        }
-
-        button:disabled {
-            background: #999;
-            cursor: not-allowed;
-        }
-
-        .range-info {
-            display: none;
-            margin-top: 8px;
-            font-size: 14px;
-            color: #555;
-        }
-    </style>
 </head>
 
 <body>
 
 <div class="container">
 
-    <div class="form-card" id="formCard">
+```
+<h1>Load Date Request</h1>
 
-        <h1>Date Range Request</h1>
+<p class="description">
+    Enter a company number and date range.
+</p>
 
-        <p class="description">
-            Enter the company number and select the date range you would like to process.
-            The maximum allowed range is 31 days.
-        </p>
+<div id="errorMessage" class="error"></div>
 
-        <form id="dateForm">
+<form id="dateForm">
 
-            <!-- COMPANY NUMBER -->
-
-            <div class="form-group">
-                <label for="companyNumber">Company Number</label>
-
-                <input
-                    type="text"
-                    id="companyNumber"
-                    name="company_number"
-                    placeholder="Enter company number"
-                    required
-                >
-            </div>
-
-
-            <!-- FROM DATE -->
-
-            <div class="form-group">
-                <label for="fromDate">From Date</label>
-
-                <input
-                    type="date"
-                    id="fromDate"
-                    name="from_date"
-                    required
-                >
-            </div>
-
-
-            <!-- TO DATE -->
-
-            <div class="form-group">
-                <label for="toDate">To Date</label>
-
-                <input
-                    type="date"
-                    id="toDate"
-                    name="to_date"
-                    required
-                >
-
-                <div class="help-text">
-                    Maximum date range: 31 days
-                </div>
-
-                <div class="range-info" id="rangeInfo"></div>
-            </div>
-
-
-            <!-- ERROR MESSAGE -->
-
-            <div class="error" id="errorMessage"></div>
-
-
-            <!-- SUBMIT -->
-
-            <button type="submit" id="submitButton">
-                Submit
-            </button>
-
-        </form>
+    <div class="form-group">
+        <label for="companyNumber">Company Number</label>
+        <input
+            type="text"
+            id="companyNumber"
+            name="companyNumber"
+            placeholder="Enter company number"
+            required
+        >
     </div>
 
-
-    <!-- SUCCESS MESSAGE -->
-
-    <div class="form-card success" id="successCard">
-
-        <h2>Request Submitted</h2>
-
-        <p>
-            Your request was successfully submitted.
-        </p>
-
-        <p id="submittedDates"></p>
-
+    <div class="form-group">
+        <label for="fromDate">From Date</label>
+        <input
+            type="date"
+            id="fromDate"
+            name="fromDate"
+            required
+        >
     </div>
+
+    <div class="form-group">
+        <label for="toDate">To Date</label>
+        <input
+            type="date"
+            id="toDate"
+            name="toDate"
+            required
+        >
+
+        <div id="rangeInfo" class="range-info"></div>
+    </div>
+
+    <button type="submit" id="submitButton">
+        Submit
+    </button>
+
+</form>
+
+<div id="successMessage" class="success">
+    <h2>Request Submitted</h2>
+    <p>Your request was successfully submitted.</p>
+</div>
+```
 
 </div>
 
-
 <script>
 
-    // ============================================================
-    // n8n WEBHOOK
-    // ============================================================
-
+    // n8n TEST webhook URL
     const N8N_WEBHOOK_URL =
         "https://bennettfc.app.n8n.cloud/webhook-test/6b3a87e2-90bc-44a9-b5ed-9632000d068f";
 
 
-    // ============================================================
-    // FORM ELEMENTS
-    // ============================================================
-
     const form = document.getElementById("dateForm");
-
-    const companyNumberInput =
-        document.getElementById("companyNumber");
-
-    const fromDateInput =
-        document.getElementById("fromDate");
-
-    const toDateInput =
-        document.getElementById("toDate");
-
-    const errorMessage =
-        document.getElementById("errorMessage");
-
-    const rangeInfo =
-        document.getElementById("rangeInfo");
-
-    const submitButton =
-        document.getElementById("submitButton");
-
-    const formCard =
-        document.getElementById("formCard");
-
-    const successCard =
-        document.getElementById("successCard");
-
-    const submittedDates =
-        document.getElementById("submittedDates");
+    const companyNumberInput = document.getElementById("companyNumber");
+    const fromDateInput = document.getElementById("fromDate");
+    const toDateInput = document.getElementById("toDate");
+    const errorMessage = document.getElementById("errorMessage");
+    const successMessage = document.getElementById("successMessage");
+    const submitButton = document.getElementById("submitButton");
+    const rangeInfo = document.getElementById("rangeInfo");
 
 
-    // ============================================================
-    // CALCULATE DATE DIFFERENCE
-    // ============================================================
-
-    function getDateDifference(fromDate, toDate) {
-
-        const from =
-            new Date(fromDate + "T00:00:00");
-
-        const to =
-            new Date(toDate + "T00:00:00");
-
-        const differenceMilliseconds =
-            to - from;
-
-        return Math.round(
-            differenceMilliseconds /
-            (1000 * 60 * 60 * 24)
-        );
-    }
-
-
-    // ============================================================
-    // SHOW ERROR
-    // ============================================================
-
+    // Show an error message
     function showError(message) {
-
         errorMessage.textContent = message;
-
         errorMessage.style.display = "block";
     }
 
 
-    // ============================================================
-    // CLEAR ERROR
-    // ============================================================
-
-    function clearError() {
-
+    // Hide the error message
+    function hideError() {
         errorMessage.textContent = "";
-
         errorMessage.style.display = "none";
     }
 
 
-    // ============================================================
-    // UPDATE RANGE INFORMATION
-    // ============================================================
+    // Calculate difference between dates
+    function calculateDifference(fromDate, toDate) {
 
-    function updateRangeInfo() {
+        const from = new Date(fromDate + "T00:00:00");
+        const to = new Date(toDate + "T00:00:00");
 
-        clearError();
+        const differenceMilliseconds = to - from;
 
-        const fromDate =
-            fromDateInput.value;
-
-        const toDate =
-            toDateInput.value;
-
-
-        if (!fromDate || !toDate) {
-
-            rangeInfo.style.display = "none";
-
-            return;
-        }
-
-
-        const differenceDays =
-            getDateDifference(
-                fromDate,
-                toDate
-            );
-
-
-        // To date before from date
-
-        if (differenceDays < 0) {
-
-            rangeInfo.style.display = "none";
-
-            showError(
-                "To date cannot be before the From date."
-            );
-
-            return;
-        }
-
-
-        // More than 31 days
-
-        if (differenceDays > 31) {
-
-            rangeInfo.style.display = "block";
-
-            rangeInfo.textContent =
-                `Selected range: ${differenceDays} days`;
-
-            showError(
-                "Date range cannot be longer than 31 days."
-            );
-
-            return;
-        }
-
-
-        // Valid range
-
-        rangeInfo.style.display = "block";
-
-        rangeInfo.textContent =
-            `Selected range: ${differenceDays} days`;
+        return Math.floor(
+            differenceMilliseconds / (1000 * 60 * 60 * 24)
+        );
     }
 
 
-    // ============================================================
-    // LIVE DATE VALIDATION
-    // ============================================================
+    // Validate the dates while the user is filling out the form
+    function validateDates() {
 
-    fromDateInput.addEventListener(
-        "change",
-        updateRangeInfo
-    );
+        const fromDate = fromDateInput.value;
+        const toDate = toDateInput.value;
 
-    toDateInput.addEventListener(
-        "change",
-        updateRangeInfo
-    );
+        rangeInfo.textContent = "";
+
+        if (!fromDate || !toDate) {
+            return true;
+        }
+
+        const differenceDays = calculateDifference(fromDate, toDate);
+
+        if (differenceDays < 0) {
+
+            showError("The To Date cannot be before the From Date.");
+
+            rangeInfo.textContent = "";
+            return false;
+        }
+
+        if (differenceDays > 31) {
+
+            showError("The date range cannot be longer than 31 days.");
+
+            rangeInfo.textContent =
+                "Current range: " + differenceDays + " days. Maximum: 31 days.";
+
+            return false;
+        }
+
+        hideError();
+
+        rangeInfo.textContent =
+            "Date range: " + differenceDays + " days.";
+
+        return true;
+    }
 
 
-    // ============================================================
-    // FORM SUBMISSION
-    // ============================================================
-
-    form.addEventListener(
-        "submit",
-        async function(event) {
-
-            event.preventDefault();
-
-            clearError();
+    // Revalidate whenever either date changes
+    fromDateInput.addEventListener("change", validateDates);
+    toDateInput.addEventListener("change", validateDates);
 
 
-            // ----------------------------------------------------
-            // GET FORM VALUES
-            // ----------------------------------------------------
+    // Submit form
+    form.addEventListener("submit", async function(event) {
 
-            const companyNumber =
-                companyNumberInput.value.trim();
+        event.preventDefault();
 
-            const fromDate =
-                fromDateInput.value;
+        hideError();
 
-            const toDate =
-                toDateInput.value;
+        const companyNumber = companyNumberInput.value.trim();
+        const fromDate = fromDateInput.value;
+        const toDate = toDateInput.value;
 
 
-            // ----------------------------------------------------
-            // REQUIRED FIELDS
-            // ----------------------------------------------------
+        // Check company number
+        if (!companyNumber) {
 
-            if (!companyNumber) {
+            showError("Please enter a company number.");
+            return;
+        }
 
-                showError(
-                    "Please enter a company number."
+
+        // Check dates
+        if (!fromDate || !toDate) {
+
+            showError("Please enter both a From Date and a To Date.");
+            return;
+        }
+
+
+        // Calculate date difference
+        const differenceDays =
+            calculateDifference(fromDate, toDate);
+
+
+        // Make sure To Date is not before From Date
+        if (differenceDays < 0) {
+
+            showError(
+                "The To Date cannot be before the From Date."
+            );
+
+            return;
+        }
+
+
+        // Make sure range is no more than 31 days
+        if (differenceDays > 31) {
+
+            showError(
+                "The date range cannot be longer than 31 days."
+            );
+
+            return;
+        }
+
+
+        // Disable button while submitting
+        submitButton.disabled = true;
+        submitButton.textContent = "Submitting...";
+
+
+        try {
+
+            const response = await fetch(N8N_WEBHOOK_URL, {
+
+                method: "POST",
+
+                body: JSON.stringify({
+
+                    companyNumber: companyNumber,
+
+                    fromDate: fromDate,
+
+                    toDate: toDate,
+
+                    differenceDays: differenceDays
+
+                })
+
+            });
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Server returned status " + response.status
                 );
 
-                return;
             }
 
 
-            if (!fromDate || !toDate) {
+            // Hide the form
+            form.style.display = "none";
 
-                showError(
-                    "Please select both a From Date and a To Date."
-                );
-
-                return;
-            }
+            // Show success message
+            successMessage.style.display = "block";
 
 
-            // ----------------------------------------------------
-            // CALCULATE DATE RANGE
-            // ----------------------------------------------------
+        } catch (error) {
 
-            const differenceDays =
-                getDateDifference(
-                    fromDate,
-                    toDate
-                );
+            console.error("Submission error:", error);
 
+            showError(
+                "There was a problem submitting your request. Please try again."
+            );
 
-            // ----------------------------------------------------
-            // TO DATE BEFORE FROM DATE
-            // ----------------------------------------------------
-
-            if (differenceDays < 0) {
-
-                showError(
-                    "To date cannot be before the From date."
-                );
-
-                return;
-            }
-
-
-            // ----------------------------------------------------
-            // 31-DAY LIMIT
-            // ----------------------------------------------------
-
-            if (differenceDays > 31) {
-
-                showError(
-                    "Date range cannot be longer than 31 days."
-                );
-
-                return;
-            }
-
-
-            // ----------------------------------------------------
-            // PREVENT MULTIPLE SUBMISSIONS
-            // ----------------------------------------------------
-
-            submitButton.disabled = true;
-
-            submitButton.textContent =
-                "Submitting...";
-
-
-            // ----------------------------------------------------
-            // DATA SENT TO n8n
-            // ----------------------------------------------------
-
-            const data = {
-
-                company_number:
-                    companyNumber,
-
-                from_date:
-                    fromDate,
-
-                to_date:
-                    toDate,
-
-                difference_days:
-                    differenceDays
-
-            };
-
-
-            // ----------------------------------------------------
-            // SEND DATA TO n8n
-            // ----------------------------------------------------
-
-            try {
-
-                const response =
-                    await fetch(
-                        N8N_WEBHOOK_URL,
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify(data)
-                        }
-                    );
-
-
-                // ------------------------------------------------
-                // CHECK n8n RESPONSE
-                // ------------------------------------------------
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `n8n returned status ${response.status}`
-                    );
-                }
-
-
-                // ------------------------------------------------
-                // SUCCESS
-                // ------------------------------------------------
-
-                formCard.style.display =
-                    "none";
-
-                successCard.style.display =
-                    "block";
-
-                submittedDates.textContent =
-                    `Company ${companyNumber}: From ${fromDate} through ${toDate}`;
-
-
-            } catch (error) {
-
-                console.error(error);
-
-                showError(
-                    "There was a problem submitting your request. Please try again."
-                );
-
-                submitButton.disabled =
-                    false;
-
-                submitButton.textContent =
-                    "Submit";
-            }
+            submitButton.disabled = false;
+            submitButton.textContent = "Submit";
 
         }
-    );
+
+    });
 
 </script>
 
