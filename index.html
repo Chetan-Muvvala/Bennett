@@ -1,0 +1,505 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Date Range Request</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            padding: 35px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .description {
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            background: white;
+        }
+
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        .help-text {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #777;
+        }
+
+        .error {
+            display: none;
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            border-radius: 6px;
+            background: #fce8e8;
+            color: #b42318;
+            border: 1px solid #f5b5b5;
+            font-size: 14px;
+        }
+
+        .success {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success h2 {
+            margin-top: 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 6px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .range-info {
+            display: none;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="form-card" id="formCard">
+
+        <h1>Date Range Request</h1>
+
+        <p class="description">
+            Select the date range you would like to process.
+            The maximum allowed range is 31 days.
+        </p>
+
+        <form id="dateForm">
+
+            <div class="form-group">
+                <label for="fromDate">From Date</label>
+
+                <input
+                    type="date"
+                    id="fromDate"
+                    name="from_date"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="toDate">To Date</label>
+
+                <input
+                    type="date"
+                    id="toDate"
+                    name="to_date"
+                    required
+                >
+
+                <div class="help-text">
+                    Maximum date range: 31 days
+                </div>
+
+                <div class="range-info" id="rangeInfo"></div>
+            </div>
+
+            <div class="error" id="errorMessage"></div>
+
+            <button type="submit" id="submitButton">
+                Submit
+            </button>
+
+        </form>
+    </div>
+
+
+    <div class="form-card success" id="successCard">
+
+        <h2>Request Submitted</h2>
+
+        <p>
+            Your request was successfully submitted.
+        </p>
+
+        <p id="submittedDates"></p>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ============================================================
+    // n8n WEBHOOK
+    // ============================================================
+    //
+    // Replace this URL with your n8n PRODUCTION webhook URL.
+    //
+    // Example:
+    // https://your-n8n-instance.com/webhook/date-range
+    //
+    // ============================================================
+
+    const N8N_WEBHOOK_URL = "https://bennettfc.app.n8n.cloud/webhook/6b3a87e2-90bc-44a9-b5ed-9632000d068f";
+
+
+    // ============================================================
+    // FORM ELEMENTS
+    // ============================================================
+
+    const form = document.getElementById("dateForm");
+
+    const fromDateInput = document.getElementById("fromDate");
+    const toDateInput = document.getElementById("toDate");
+
+    const errorMessage = document.getElementById("errorMessage");
+    const rangeInfo = document.getElementById("rangeInfo");
+
+    const submitButton = document.getElementById("submitButton");
+
+    const formCard = document.getElementById("formCard");
+    const successCard = document.getElementById("successCard");
+
+    const submittedDates = document.getElementById("submittedDates");
+
+
+    // ============================================================
+    // HELPER: CALCULATE CALENDAR-DAY DIFFERENCE
+    // ============================================================
+
+    function getDateDifference(fromDate, toDate) {
+
+        const from = new Date(fromDate + "T00:00:00");
+        const to = new Date(toDate + "T00:00:00");
+
+        const differenceMilliseconds = to - from;
+
+        return Math.round(
+            differenceMilliseconds / (1000 * 60 * 60 * 24)
+        );
+    }
+
+
+    // ============================================================
+    // SHOW ERROR
+    // ============================================================
+
+    function showError(message) {
+
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+    }
+
+
+    // ============================================================
+    // CLEAR ERROR
+    // ============================================================
+
+    function clearError() {
+
+        errorMessage.textContent = "";
+        errorMessage.style.display = "none";
+    }
+
+
+    // ============================================================
+    // UPDATE RANGE INFORMATION
+    // ============================================================
+
+    function updateRangeInfo() {
+
+        clearError();
+
+        const fromDate = fromDateInput.value;
+        const toDate = toDateInput.value;
+
+        if (!fromDate || !toDate) {
+
+            rangeInfo.style.display = "none";
+
+            return;
+        }
+
+        const differenceDays = getDateDifference(
+            fromDate,
+            toDate
+        );
+
+
+        // To date before from date
+
+        if (differenceDays < 0) {
+
+            rangeInfo.style.display = "none";
+
+            showError(
+                "To date cannot be before the From date."
+            );
+
+            return;
+        }
+
+
+        // More than 31 days
+
+        if (differenceDays > 31) {
+
+            rangeInfo.style.display = "block";
+
+            rangeInfo.textContent =
+                `Selected range: ${differenceDays} days`;
+
+            showError(
+                "Date range cannot be longer than 31 days."
+            );
+
+            return;
+        }
+
+
+        // Valid range
+
+        rangeInfo.style.display = "block";
+
+        rangeInfo.textContent =
+            `Selected range: ${differenceDays} days`;
+    }
+
+
+    // ============================================================
+    // LIVE VALIDATION
+    // ============================================================
+
+    fromDateInput.addEventListener(
+        "change",
+        updateRangeInfo
+    );
+
+    toDateInput.addEventListener(
+        "change",
+        updateRangeInfo
+    );
+
+
+    // ============================================================
+    // FORM SUBMISSION
+    // ============================================================
+
+    form.addEventListener("submit", async function(event) {
+
+        // Stop the browser from submitting normally
+        event.preventDefault();
+
+        clearError();
+
+
+        const fromDate = fromDateInput.value;
+        const toDate = toDateInput.value;
+
+
+        // --------------------------------------------------------
+        // REQUIRED FIELDS
+        // --------------------------------------------------------
+
+        if (!fromDate || !toDate) {
+
+            showError(
+                "Please select both a From Date and a To Date."
+            );
+
+            return;
+        }
+
+
+        // --------------------------------------------------------
+        // CALCULATE DATE RANGE
+        // --------------------------------------------------------
+
+        const differenceDays = getDateDifference(
+            fromDate,
+            toDate
+        );
+
+
+        // --------------------------------------------------------
+        // TO DATE BEFORE FROM DATE
+        // --------------------------------------------------------
+
+        if (differenceDays < 0) {
+
+            showError(
+                "To date cannot be before the From date."
+            );
+
+            return;
+        }
+
+
+        // --------------------------------------------------------
+        // 31-DAY LIMIT
+        // --------------------------------------------------------
+
+        if (differenceDays > 31) {
+
+            showError(
+                "Date range cannot be longer than 31 days."
+            );
+
+            return;
+        }
+
+
+        // --------------------------------------------------------
+        // PREVENT MULTIPLE SUBMISSIONS
+        // --------------------------------------------------------
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Submitting...";
+
+
+        // --------------------------------------------------------
+        // DATA SENT TO n8n
+        // --------------------------------------------------------
+
+        const data = {
+
+            from_date: fromDate,
+
+            to_date: toDate,
+
+            difference_days: differenceDays
+
+        };
+
+
+        // --------------------------------------------------------
+        // SEND DATA TO n8n WEBHOOK
+        // --------------------------------------------------------
+
+        try {
+
+            const response = await fetch(
+                N8N_WEBHOOK_URL,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(data)
+                }
+            );
+
+
+            // ----------------------------------------------------
+            // CHECK n8n RESPONSE
+            // ----------------------------------------------------
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `n8n returned status ${response.status}`
+                );
+            }
+
+
+            // ----------------------------------------------------
+            // SUCCESS
+            // ----------------------------------------------------
+
+            formCard.style.display = "none";
+
+            successCard.style.display = "block";
+
+            submittedDates.textContent =
+                `From ${fromDate} through ${toDate}`;
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showError(
+                "There was a problem submitting your request. Please try again."
+            );
+
+            submitButton.disabled = false;
+
+            submitButton.textContent = "Submit";
+        }
+
+    });
+
+</script>
+
+</body>
+</html>
+```
