@@ -3,380 +3,553 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Load Date Request</title>
 
-```
-<style>
-    * {
-        box-sizing: border-box;
-    }
+    <title>Bennett Hazmat Load Audit</title>
 
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background-color: #f4f6f8;
-        color: #222;
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    .container {
-        max-width: 500px;
-        margin: 60px auto;
-        padding: 30px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    h1 {
-        margin-top: 0;
-        margin-bottom: 10px;
-        text-align: center;
-    }
+        .container {
+            width: 100%;
+            max-width: 520px;
+            padding: 20px;
+        }
 
-    .description {
-        text-align: center;
-        color: #666;
-        margin-bottom: 30px;
-    }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        }
 
-    .form-group {
-        margin-bottom: 20px;
-    }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 26px;
+        }
 
-    label {
-        display: block;
-        margin-bottom: 7px;
-        font-weight: bold;
-    }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
 
-    input {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-    }
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-    input:focus {
-        outline: none;
-        border-color: #555;
-    }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
 
-    .error {
-        display: none;
-        margin-bottom: 20px;
-        padding: 12px;
-        background-color: #fde8e8;
-        color: #b42318;
-        border-radius: 6px;
-        font-size: 14px;
-    }
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
 
-    .success {
-        display: none;
-        text-align: center;
-        padding: 20px;
-        background-color: #e8f5e9;
-        color: #216e39;
-        border-radius: 6px;
-    }
+        input:focus {
+            outline: none;
+            border-color: #555;
+        }
 
-    button {
-        width: 100%;
-        padding: 13px;
-        font-size: 16px;
-        font-weight: bold;
-        color: white;
-        background-color: #333;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    }
+        .date-info {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #777;
+        }
 
-    button:hover {
-        background-color: #555;
-    }
+        .error {
+            display: none;
+            background: #fff0f0;
+            border: 1px solid #e0a0a0;
+            color: #b00020;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
 
-    button:disabled {
-        background-color: #aaa;
-        cursor: not-allowed;
-    }
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
 
-    .range-info {
-        margin-top: 6px;
-        font-size: 13px;
-        color: #666;
-    }
-</style>
-```
+        button:hover {
+            background: #444;
+        }
 
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        /* Loading */
+        .loading-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #ddd;
+            border-top: 5px solid #222;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .loading-message {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Success */
+        .success-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 55px;
+            margin-bottom: 15px;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .success-message {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* Workflow error */
+        .workflow-error-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .workflow-error-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .workflow-error-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #b00020;
+        }
+
+        .workflow-error-message {
+            background: #fff0f0;
+            border: 1px solid #e0a0a0;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: left;
+            color: #8b0000;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+
+        .try-again {
+            background: #222;
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="container">
 
-```
-<h1>Load Date Request</h1>
+    <div class="card">
 
-<p class="description">
-    Enter a company number and date range.
-</p>
+        <!-- FORM -->
+        <div id="formScreen">
 
-<div id="errorMessage" class="error"></div>
+            <h1>Bennett Hazmat Load Audit</h1>
 
-<form id="dateForm">
+            <div class="subtitle">
+                Enter the date range and company number to run the hazmat
+                compliance audit.
+            </div>
 
-    <div class="form-group">
-        <label for="companyNumber">Company Number</label>
-        <input
-            type="text"
-            id="companyNumber"
-            name="companyNumber"
-            placeholder="Enter company number"
-            required
-        >
+            <form id="auditForm">
+
+                <div class="form-group">
+                    <label for="companyNumber">
+                        Company Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="companyNumber"
+                        name="companyNumber"
+                        placeholder="Enter company number"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="fromDate">
+                        Start Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="fromDate"
+                        name="fromDate"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="toDate">
+                        End Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="toDate"
+                        name="toDate"
+                        required
+                    >
+
+                    <div class="date-info">
+                        Maximum audit period: 31 days
+                    </div>
+                </div>
+
+                <div id="formError" class="error"></div>
+
+                <button type="submit" id="submitButton">
+                    Run Hazmat Audit
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- LOADING -->
+        <div id="loadingScreen" class="loading-screen">
+
+            <div class="spinner"></div>
+
+            <div class="loading-title">
+                Running Hazmat Audit
+            </div>
+
+            <div class="loading-message">
+                Please wait while the hazmat orders are retrieved,
+                BOLs are processed, and the compliance audit is completed.
+                <br><br>
+                This may take a few minutes.
+            </div>
+
+        </div>
+
+
+        <!-- SUCCESS -->
+        <div id="successScreen" class="success-screen">
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <div class="success-title">
+                Audit Completed Successfully
+            </div>
+
+            <div id="successMessage" class="success-message">
+                The final audit has been sent.
+            </div>
+
+            <br>
+
+            <button
+                type="button"
+                class="try-again"
+                onclick="location.reload()"
+            >
+                Run Another Audit
+            </button>
+
+        </div>
+
+
+        <!-- WORKFLOW ERROR -->
+        <div id="workflowErrorScreen" class="workflow-error-screen">
+
+            <div class="workflow-error-icon">
+                ⚠
+            </div>
+
+            <div class="workflow-error-title">
+                Audit Could Not Be Completed
+            </div>
+
+            <div
+                id="workflowErrorMessage"
+                class="workflow-error-message"
+            >
+                An error occurred while running the audit.
+            </div>
+
+            <button
+                type="button"
+                class="try-again"
+                onclick="location.reload()"
+            >
+                Try Again
+            </button>
+
+        </div>
+
     </div>
 
-    <div class="form-group">
-        <label for="fromDate">From Date</label>
-        <input
-            type="date"
-            id="fromDate"
-            name="fromDate"
-            required
-        >
-    </div>
-
-    <div class="form-group">
-        <label for="toDate">To Date</label>
-        <input
-            type="date"
-            id="toDate"
-            name="toDate"
-            required
-        >
-
-        <div id="rangeInfo" class="range-info"></div>
-    </div>
-
-    <button type="submit" id="submitButton">
-        Submit
-    </button>
-
-</form>
-
-<div id="successMessage" class="success">
-    <h2>Request Submitted</h2>
-    <p>Your request was successfully submitted.</p>
 </div>
-```
 
-</div>
 
 <script>
 
-    // n8n TEST webhook URL
-    const N8N_WEBHOOK_URL =
-        "https://bennettfc.app.n8n.cloud/webhook-test/6b3a87e2-90bc-44a9-b5ed-9632000d068f";
+const WEBHOOK_URL = "YOUR_N8N_WEBHOOK_URL";
 
 
-    const form = document.getElementById("dateForm");
-    const companyNumberInput = document.getElementById("companyNumber");
-    const fromDateInput = document.getElementById("fromDate");
-    const toDateInput = document.getElementById("toDate");
-    const errorMessage = document.getElementById("errorMessage");
-    const successMessage = document.getElementById("successMessage");
-    const submitButton = document.getElementById("submitButton");
-    const rangeInfo = document.getElementById("rangeInfo");
+const form = document.getElementById("auditForm");
+
+const formScreen = document.getElementById("formScreen");
+const loadingScreen = document.getElementById("loadingScreen");
+const successScreen = document.getElementById("successScreen");
+const workflowErrorScreen =
+    document.getElementById("workflowErrorScreen");
+
+const formError = document.getElementById("formError");
+const workflowErrorMessage =
+    document.getElementById("workflowErrorMessage");
+
+const successMessage =
+    document.getElementById("successMessage");
+
+const submitButton =
+    document.getElementById("submitButton");
 
 
-    // Show an error message
-    function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = "block";
-    }
+function showFormError(message) {
+
+    formError.textContent = message;
+    formError.style.display = "block";
+}
 
 
-    // Hide the error message
-    function hideError() {
-        errorMessage.textContent = "";
-        errorMessage.style.display = "none";
-    }
+function hideFormError() {
+
+    formError.textContent = "";
+    formError.style.display = "none";
+}
 
 
-    // Calculate difference between dates
-    function calculateDifference(fromDate, toDate) {
+function getDaysBetween(start, end) {
 
-        const from = new Date(fromDate + "T00:00:00");
-        const to = new Date(toDate + "T00:00:00");
+    const startDate = new Date(start + "T00:00:00");
+    const endDate = new Date(end + "T00:00:00");
 
-        const differenceMilliseconds = to - from;
+    const difference =
+        endDate.getTime() - startDate.getTime();
 
-        return Math.floor(
-            differenceMilliseconds / (1000 * 60 * 60 * 24)
+    return difference / (1000 * 60 * 60 * 24);
+}
+
+
+form.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    hideFormError();
+
+    const companyNumber =
+        document.getElementById("companyNumber").value.trim();
+
+    const fromDate =
+        document.getElementById("fromDate").value;
+
+    const toDate =
+        document.getElementById("toDate").value;
+
+
+    // Company number validation
+    if (!companyNumber) {
+
+        showFormError(
+            "Please enter a company number."
         );
+
+        return;
     }
 
 
-    // Validate the dates while the user is filling out the form
-    function validateDates() {
+    // Date validation
+    if (!fromDate || !toDate) {
 
-        const fromDate = fromDateInput.value;
-        const toDate = toDateInput.value;
+        showFormError(
+            "Please enter both a start date and an end date."
+        );
 
-        rangeInfo.textContent = "";
-
-        if (!fromDate || !toDate) {
-            return true;
-        }
-
-        const differenceDays = calculateDifference(fromDate, toDate);
-
-        if (differenceDays < 0) {
-
-            showError("The To Date cannot be before the From Date.");
-
-            rangeInfo.textContent = "";
-            return false;
-        }
-
-        if (differenceDays > 31) {
-
-            showError("The date range cannot be longer than 31 days.");
-
-            rangeInfo.textContent =
-                "Current range: " + differenceDays + " days. Maximum: 31 days.";
-
-            return false;
-        }
-
-        hideError();
-
-        rangeInfo.textContent =
-            "Date range: " + differenceDays + " days.";
-
-        return true;
+        return;
     }
 
 
-    // Revalidate whenever either date changes
-    fromDateInput.addEventListener("change", validateDates);
-    toDateInput.addEventListener("change", validateDates);
+    // End date cannot be before start date
+    if (toDate < fromDate) {
+
+        showFormError(
+            "The end date cannot be before the start date."
+        );
+
+        return;
+    }
 
 
-    // Submit form
-    form.addEventListener("submit", async function(event) {
-
-        event.preventDefault();
-
-        hideError();
-
-        const companyNumber = companyNumberInput.value.trim();
-        const fromDate = fromDateInput.value;
-        const toDate = toDateInput.value;
+    // Check date range
+    const days = getDaysBetween(
+        fromDate,
+        toDate
+    );
 
 
-        // Check company number
-        if (!companyNumber) {
+    if (days > 31) {
 
-            showError("Please enter a company number.");
-            return;
-        }
+        showFormError(
+            "The audit period cannot be longer than 31 days. " +
+            "Please select a shorter date range."
+        );
 
-
-        // Check dates
-        if (!fromDate || !toDate) {
-
-            showError("Please enter both a From Date and a To Date.");
-            return;
-        }
+        return;
+    }
 
 
-        // Calculate date difference
-        const differenceDays =
-            calculateDifference(fromDate, toDate);
+    // Disable button
+    submitButton.disabled = true;
+    submitButton.textContent = "Starting Audit...";
 
 
-        // Make sure To Date is not before From Date
-        if (differenceDays < 0) {
-
-            showError(
-                "The To Date cannot be before the From Date."
-            );
-
-            return;
-        }
+    // Show loading screen
+    formScreen.style.display = "none";
+    loadingScreen.style.display = "block";
 
 
-        // Make sure range is no more than 31 days
-        if (differenceDays > 31) {
+    try {
 
-            showError(
-                "The date range cannot be longer than 31 days."
-            );
-
-            return;
-        }
-
-
-        // Disable button while submitting
-        submitButton.disabled = true;
-        submitButton.textContent = "Submitting...";
-
-
-        try {
-
-            const response = await fetch(N8N_WEBHOOK_URL, {
-
+        const response = await fetch(
+            WEBHOOK_URL,
+            {
                 method: "POST",
 
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
                 body: JSON.stringify({
-
-                    companyNumber: companyNumber,
-
                     fromDate: fromDate,
-
                     toDate: toDate,
-
-                    differenceDays: differenceDays
-
+                    companyNumber: companyNumber
                 })
-
-            });
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "Server returned status " + response.status
-                );
-
             }
+        );
 
 
-            // Hide the form
-            form.style.display = "none";
+        let result;
 
-            // Show success message
-            successMessage.style.display = "block";
-
-
-        } catch (error) {
-
-            console.error("Submission error:", error);
-
-            showError(
-                "There was a problem submitting your request. Please try again."
-            );
-
-            submitButton.disabled = false;
-            submitButton.textContent = "Submit";
-
+        try {
+            result = await response.json();
+        } catch {
+            result = {};
         }
 
-    });
+
+        if (!response.ok || result.success === false) {
+
+            throw new Error(
+                result.message ||
+                result.error ||
+                "The audit workflow returned an error."
+            );
+        }
+
+
+        // SUCCESS
+        loadingScreen.style.display = "none";
+        successScreen.style.display = "block";
+
+
+        const email =
+            result.email ||
+            "the configured email recipient";
+
+
+        successMessage.innerHTML =
+            "The final hazmat audit has been completed " +
+            "and sent to:<br><br>" +
+            "<strong>" +
+            email +
+            "</strong>";
+
+    }
+
+    catch (error) {
+
+        loadingScreen.style.display = "none";
+        workflowErrorScreen.style.display = "block";
+
+
+        workflowErrorMessage.textContent =
+            error.message ||
+            "An unexpected error occurred while running the audit.";
+
+    }
+
+});
 
 </script>
 
